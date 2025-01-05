@@ -21,6 +21,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
   }
 
   double num1 = 0.0;
+  double num2 = 0.0;
   String operation = '';
   String currentInput = '';
   double result = 0.0;
@@ -34,22 +35,29 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       });
       currentInput += button;
       display(currentInput); // Display the current input
+      // if (tempResult == 0.0) {
+      //   num1 = double.parse(currentInput);
+      // } else {
+      //   num1 = tempResult;
+      // }
+
+      if ((operation != '') && (num1 != 0.0)) {
+        num2 = double.parse(currentInput);
+      }
     } else if (['+', '-', 'x', '/'].contains(button)) {
       // If the button is an operator
       setState(() {
         displayValue += button;
       });
-      if (tempResult == 0.0) {
+      if (num1 == 0.0) {
         num1 = double.parse(currentInput);
-      } else {
-        num1 = tempResult;
       }
 
       operation = button;
       currentInput = '';
     } else if (button == '=') {
       // If the button is '='
-      double num2 = double.parse(currentInput);
+      // double num2 = double.parse(currentInput);
 
       // Perform the operation
       if (operation == '+') {
@@ -71,9 +79,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
         setState(() {
           result = num1 / num2;
         });
-      }else if (operation == "%"){
-        
-      }
+      } else if (operation == "%") {}
 
       // Display and prepare for the next calculation
       display(result);
@@ -83,6 +89,39 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       currentInput = "";
       operation = '';
     }
+    // Perform the operation
+    if (operation == '+') {
+      setState(() {
+        result = num1 + num2;
+      });
+      //result = num1 + num2;
+    } else if (operation == '-') {
+      setState(() {
+        result = num1 - num2;
+      });
+      //result = num1 - num2;
+    } else if (operation == 'x') {
+      if(num2 != 0.0){
+        setState(() {
+          result = num1 * num2;
+        });
+      }
+      //result = num1 * num2;
+    } else if (operation == '/') {
+       if (num2 != 0.0) {
+        setState(() {
+          result = num1 / num2;
+        });
+      }
+    } else if (operation == "%") {}
+
+    // Display and prepare for the next calculation
+    display(result);
+    if (result != 0.0) {
+      num1 = result;
+      num2 = 0.0;
+    }
+    //;
   }
 
   bool isNumber(String str) {
@@ -96,14 +135,18 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
   }
 
   void clear() {
+    result = 0.0;
+    tempResult = 00;
     setState(
       () {
         displayValue = "";
         result = 0.0;
         tempResult = 0.0;
+        num1 = 0.0;
+        num2 = 0.0;
       },
     );
-
+    display(result);
   }
 
   final List<Map<String, dynamic>> boxData = [
