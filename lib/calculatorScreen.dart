@@ -16,144 +16,159 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
   }
 
   void delete() {
-    setState(() =>
-        displayValue = displayValue.substring(0, displayValue.length - 1));
+    setState(
+      () => displayValue = displayValue.substring(
+        0,
+        displayValue.length - 1,
+      ),
+    );
+    maths();
   }
 
   double num1 = 0.0;
   double num2 = 0.0;
   String operation = '';
+  String prevOperation = '';
   String currentInput = '';
   double result = 0.0;
   double tempResult = 0.0;
+  String num = '';
 
-  void maths(String button) {
+  void maths([String? button]) {
+      if (button == null) {
+      return; // Exit the function if button is null
+    }
     if (isNumber(button)) {
       // If the button is a number
       setState(() {
-        displayValue += button;
+        displayValue += button; // Append to display
       });
       currentInput += button;
-      display(currentInput); // Display the current input
-      // if (tempResult == 0.0) {
-      //   num1 = double.parse(currentInput);
-      // } else {
-      //   num1 = tempResult;
-      // }
+      //print(button);
 
-      if ((operation != '') && (num1 != 0.0)) {
-        num2 = double.parse(currentInput);
-      }
-    } else if (['+', '-', 'x', '/'].contains(button)) {
-      // If the button is an operator
-      setState(() {
-        displayValue += button;
-      });
-      if (num1 == 0.0) {
+      if (operation.isNotEmpty) {
+        // If there's already an operator, update num2
+
+        num += currentInput;
+        num2 = double.parse(num);
+        calculateIntermediateResult(); // Perform dynamic calculation
+      } else {
+        // If there's no operator yet, update num1
         num1 = double.parse(currentInput);
+        display(num1); // Display the first number
+      }
+    } else if (['+', '-', 'x', '/', '%'].contains(button)) {
+      if (result != 0.0) {
+        num1 = result;
+        num = '';
       }
 
+      // If the button is an operator
+      if (currentInput.isEmpty && result == 0.0) {
+        display("Error: Enter a number first");
+        return;
+      }
+
+      if (operation.isNotEmpty && currentInput.isNotEmpty) {
+        // If there's already an operator, finalize the current calculation
+        num2 += double.parse(currentInput);
+        calculateIntermediateResult();
+      }
+
+      // Set the new operator and reset input
+      setState(() {
+        displayValue += button; // Append operator to display
+      });
       operation = button;
-      currentInput = '';
+      if (operation == "%") {
+        calculateIntermediateResult();
+      }
+      currentInput = ''; // Clear current input for the next number
     } else if (button == '=') {
       // If the button is '='
-      // double num2 = double.parse(currentInput);
-
-      // Perform the operation
-      if (operation == '+') {
-        setState(() {
-          result = num1 + num2;
-        });
-        //result = num1 + num2;
-      } else if (operation == '-') {
-        setState(() {
-          result = num1 - num2;
-        });
-        //result = num1 - num2;
-      } else if (operation == 'x') {
-        setState(() {
-          result = num1 * num2;
-        });
-        //result = num1 * num2;
-      } else if (operation == '/') {
-        setState(() {
-          result = num1 / num2;
-        });
-      } else if (operation == "%") {}
-
-      // Display and prepare for the next calculation
-      display(result);
-
-      num1 = result;
-      tempResult = result;
-      currentInput = "";
-      operation = '';
-    }
-    // Perform the operation
-    if (operation == '+') {
-      setState(() {
-        result = num1 + num2;
-      });
-      //result = num1 + num2;
-    } else if (operation == '-') {
-      setState(() {
-        result = num1 - num2;
-      });
-      //result = num1 - num2;
-    } else if (operation == 'x') {
-      if(num2 != 0.0){
-        setState(() {
-          result = num1 * num2;
-        });
+      if (operation.isNotEmpty && currentInput.isNotEmpty) {
+        num2 = double.parse(currentInput);
+        calculateIntermediateResult(); // Perform the final calculation
+        display(result);
+        resetAfterEquals(); // Prepare for a new calculation
+      } else {
+        display("Error: Invalid input");
       }
-      //result = num1 * num2;
-    } else if (operation == '/') {
-       if (num2 != 0.0) {
-        setState(() {
-          result = num1 / num2;
-        });
-      }
-    } else if (operation == "%") {}
-
-    // Display and prepare for the next calculation
-    display(result);
-    if (result != 0.0) {
-      num1 = result;
-      num2 = 0.0;
     }
-    //;
   }
 
+// Function to perform the intermediate calculation
+  void calculateIntermediateResult() {
+    if (operation == '+') {
+      result = num1 + num2;
+    } else if (operation == '-') {
+      result = num1 - num2;
+    } else if (operation == 'x') {
+      result = num1 * num2;
+    } else if (operation == '/') {
+      if (num2 == 0.0) {
+        display("Error: Division by zero");
+        return;
+      }
+      result = num1 / num2;
+    } else if (operation == "%") {
+      display(operation);
+      // if (num2 == 0.0) {
+      //   display("Error: Division by zero");
+      //   return;
+      // }
+      result = num1 / 100; // Handles floating-point remainder
+      //result = num1 - (num2 * (num1 ~/ num2)); // Handles floating-point remainder
+    }
+
+    // Update num1 for chaining operations
+    //num1 = result;
+    currentInput = '';
+    // setState(() {
+    //   currentInput = '';
+    // });
+
+    // Display the intermediate result
+    display(result);
+  }
+
+// Function to reset values after '='
+  void resetAfterEquals() {
+    num1 = result;
+    num2 = 0.0;
+    currentInput = '';
+    operation = '';
+  }
+
+// Helper function to check if a string is a number
   bool isNumber(String str) {
-    // Check if the string is a number
     return double.tryParse(str) != null;
   }
 
+// Function to display a value (update the UI or log to console)
   void display(dynamic value) {
-    print(
-        value); // You can replace this with logic to update the calculator display in your app's UI
+    print(value); // Replace with UI display logic
   }
 
+// Function to clear the calculator
   void clear() {
-    result = 0.0;
-    tempResult = 00;
-    setState(
-      () {
-        displayValue = "";
-        result = 0.0;
-        tempResult = 0.0;
-        num1 = 0.0;
-        num2 = 0.0;
-      },
-    );
-    display(result);
+    setState(() {
+      displayValue = "";
+      result = 0.0;
+      num1 = 0.0;
+      num2 = 0.0;
+      currentInput = '';
+      operation = '';
+      num = '';
+    });
+    display(0); // Reset the display
   }
 
   final List<Map<String, dynamic>> boxData = [
     {
       "color": Colors.red,
       "content":
-          const Text("c", style: TextStyle(color: Colors.white, fontSize: 24))
+          const Text("C", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
       "color": Colors.blue,
@@ -321,15 +336,6 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
                           209, 34, 33, 33), // Color of each square
                       child: InkWell(
                         onTap: () => {
-                          // if(index == 0){
-                          //   clear()
-                          // }else if(index == 3){
-                          //   delete()
-                          // }else if( index == 1 || index == 2 || index == 7 || index == 11 || index == 16 ){
-                          //   addvalues(box['content'].data)
-                          // }
-                          // else
-                          // maths(box['content'].data),
                           if (box["content"] is Icon &&
                               box["content"].icon == Icons.close_rounded)
                             {delete()}
