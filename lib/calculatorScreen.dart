@@ -9,22 +9,6 @@ class Calculatorscreen extends StatefulWidget {
 
 class _CalculatorscreenState extends State<Calculatorscreen> {
   var displayValue = "";
-  void addvalues(value) {
-    setState(() {
-      displayValue += value;
-    });
-  }
-
-  void delete() {
-    setState(
-      () => displayValue = displayValue.substring(
-        0,
-        displayValue.length - 1,
-      ),
-    );
-    maths();
-  }
-
   double num1 = 0.0;
   double num2 = 0.0;
   String operation = '';
@@ -33,9 +17,79 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
   double result = 0.0;
   double tempResult = 0.0;
   String num = '';
+  double size = 30;
+
+  void addvalues(value) {
+    setState(() {
+      displayValue += value;
+    });
+  }
+
+  void delete() {
+    if (displayValue.isNotEmpty) {
+      setState(() {
+        // Remove the last character
+        displayValue = displayValue.substring(0, displayValue.length - 1);
+      });
+
+      // Recompute the calculations
+      parseAndCompute(displayValue);
+    } else {
+      // If display is empty, reset values
+      setState(() {
+        num1 = 0.0;
+        num2 = 0.0;
+        operation = '';
+        currentInput = '';
+        result = 0.0;
+      });
+    }
+  }
+
+  void parseAndCompute(String expression) {
+    // Reset all values
+    num1 = 0.0;
+    num2 = 0.0;
+    operation = '';
+    result = 0.0;
+
+    String current = '';
+    bool isOperator(String char) => ['+', '-', 'x', '/', '%'].contains(char);
+
+    for (int i = 0; i < expression.length; i++) {
+      String char = expression[i];
+
+      if (isNumber(char)) {
+        current += char;
+      } else if (isOperator(char)) {
+        if (num1 == 0.0) {
+          num1 = double.parse(current);
+        } else {
+          num2 = double.parse(current);
+          calculateIntermediateResult(); // Perform intermediate calculation
+          num1 = result; // Chain the result
+        }
+        operation = char;
+        current = ''; // Reset for the next number
+      }
+    }
+
+    // Handle the final number
+    if (current.isNotEmpty) {
+      num2 = double.tryParse(current) ?? 0.0;
+      if (operation.isNotEmpty) {
+        calculateIntermediateResult();
+      } else {
+        result = num1;
+      }
+    }
+
+    // Update the display with the final result
+    display(result);
+  }
 
   void maths([String? button]) {
-      if (button == null) {
+    if (button == null) {
       return; // Exit the function if button is null
     }
     if (isNumber(button)) {
@@ -57,7 +111,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
         num1 = double.parse(currentInput);
         display(num1); // Display the first number
       }
-    } else if (['+', '-', 'x', '/', '%'].contains(button)) {
+    } else if (['+', '-', 'X', '/', '%'].contains(button)) {
       if (result != 0.0) {
         num1 = result;
         num = '';
@@ -103,7 +157,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       result = num1 + num2;
     } else if (operation == '-') {
       result = num1 - num2;
-    } else if (operation == 'x') {
+    } else if (operation == 'X') {
       result = num1 * num2;
     } else if (operation == '/') {
       if (num2 == 0.0) {
@@ -117,7 +171,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       //   display("Error: Division by zero");
       //   return;
       // }
-      result = num1 / 100; // Handles floating-point remainder
+      result = num1 * 0.01; // Handles floating-point remainder
       //result = num1 - (num2 * (num1 ~/ num2)); // Handles floating-point remainder
     }
 
@@ -166,105 +220,105 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
 
   final List<Map<String, dynamic>> boxData = [
     {
-      "color": Colors.red,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("C", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.blue,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
-          const Text("/", style: TextStyle(color: Colors.white, fontSize: 30))
+          const Text("/", style: TextStyle(color: Colors.amber, fontSize: 30))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
-          const Text("x", style: TextStyle(color: Colors.white, fontSize: 24))
+          const Text("X", style: TextStyle(color: Colors.amber, fontSize: 24))
     },
     {
-      "color": Colors.green,
-      "content": const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+      "color": const Color.fromARGB(209, 34, 33, 33),
+      "content": const Icon(Icons.cancel, color: Colors.amber, size: 40),
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content": const Text(
         "7",
         style: TextStyle(color: Colors.white, fontSize: 24),
       ),
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("8", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("9", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
-          const Text("-", style: TextStyle(color: Colors.white, fontSize: 40))
+          const Text("-", style: TextStyle(color: Colors.amber, fontSize: 40))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("4", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("5", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("6", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
-          const Text("+", style: TextStyle(color: Colors.white, fontSize: 30))
+          const Text("+", style: TextStyle(color: Colors.amber, fontSize: 30))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("1", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("2", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("3", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
-          const Text("=", style: TextStyle(color: Colors.white, fontSize: 24))
+          const Text("=", style: TextStyle(color: Colors.amber, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("%", style: TextStyle(color: Colors.white, fontSize: 24))
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text("0", style: TextStyle(color: Colors.white, fontSize: 24)),
     },
     {
-      "color": Colors.green,
+      "color": const Color.fromARGB(209, 34, 33, 33),
       "content":
           const Text(".", style: TextStyle(color: Colors.white, fontSize: 40))
     },
     {
-      "color": Colors.green,
+      "color": Colors.amber,
       "content":
-          const Text("=", style: TextStyle(color: Colors.white, fontSize: 24))
+          const Text("", style: TextStyle(color: Colors.white, fontSize: 24))
     },
 
     // Add more boxes as needed
@@ -300,9 +354,9 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
                     ),
                     Text(
                       result.toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: size,
                       ),
                     ),
                   ],
@@ -332,19 +386,19 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
                   itemBuilder: (context, index) {
                     final box = boxData[index];
                     return Container(
-                      color: const Color.fromARGB(
-                          209, 34, 33, 33), // Color of each square
+                      color: box["color"], // Color of each square
                       child: InkWell(
-                        onTap: () => {
+                        onTap: () {
                           if (box["content"] is Icon &&
-                              box["content"].icon == Icons.close_rounded)
-                            {delete()}
-                          else if (box["content"].data == "c")
-                            {clear()}
-                          else
-                            {
-                              maths(box['content'].data),
-                            },
+                              (box["content"] as Icon).icon == Icons.cancel) {
+                            delete();
+                          } else if (box["content"] is Text &&
+                              (box["content"] as Text).data == "C") {
+                            clear();
+                          } else if (box["content"] is Text) {
+                            String buttonValue = (box["content"] as Text).data!;
+                            maths(buttonValue);
+                          }
                         },
                         child: Center(
                           child: box["content"],
