@@ -25,15 +25,22 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
     });
   }
 
-  void delete() {
+void delete() {
     if (displayValue.isNotEmpty) {
       setState(() {
         // Remove the last character
         displayValue = displayValue.substring(0, displayValue.length - 1);
       });
 
-      // Recompute the calculations
-      parseAndCompute(displayValue);
+      // Check if the expression is valid before recomputing
+      if (_isExpressionValid(displayValue)) {
+        parseAndCompute(displayValue);
+      } else {
+        // Handle incomplete or invalid expressions gracefully
+        setState(() {
+          result = 0.0;
+        });
+      }
     } else {
       // If display is empty, reset values
       setState(() {
@@ -46,7 +53,16 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
     }
   }
 
-  void parseAndCompute(String expression) {
+  bool _isExpressionValid(String expression) {
+    // Check if the expression ends with a number
+    if (expression.isEmpty ||
+        ['+', '-', 'x', '/', '%'].contains(expression[expression.length - 1])) {
+      return false;
+    }
+    return true;
+  }
+
+void parseAndCompute(String expression) {
     // Reset all values
     num1 = 0.0;
     num2 = 0.0;
@@ -62,9 +78,9 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       if (isNumber(char)) {
         current += char;
       } else if (isOperator(char)) {
-        if (num1 == 0.0) {
+        if (num1 == 0.0 && current.isNotEmpty) {
           num1 = double.parse(current);
-        } else {
+        } else if (current.isNotEmpty) {
           num2 = double.parse(current);
           calculateIntermediateResult(); // Perform intermediate calculation
           num1 = result; // Chain the result
@@ -93,6 +109,9 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       return; // Exit the function if button is null
     }
     if (isNumber(button)) {
+      setState(() {
+        size = 30;
+      });
       // If the button is a number
       setState(() {
         displayValue += button; // Append to display
@@ -112,6 +131,9 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
         display(num1); // Display the first number
       }
     } else if (['+', '-', 'X', '/', '%'].contains(button)) {
+      setState(() {
+        size = 30;
+      });
       if (result != 0.0) {
         num1 = result;
         num = '';
@@ -139,15 +161,21 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
       }
       currentInput = ''; // Clear current input for the next number
     } else if (button == '=') {
+      setState(() {
+        size = 50;
+      });
+      // display(button);
+      // display(operation);
+      // display(currentInput);
       // If the button is '='
-      if (operation.isNotEmpty && currentInput.isNotEmpty) {
-        num2 = double.parse(currentInput);
-        calculateIntermediateResult(); // Perform the final calculation
-        display(result);
-        resetAfterEquals(); // Prepare for a new calculation
-      } else {
-        display("Error: Invalid input");
-      }
+      // if (operation.isNotEmpty && currentInput.isNotEmpty) {
+      //   num2 = double.parse(currentInput);
+      //   calculateIntermediateResult(); // Perform the final calculation
+      //   display(result);
+      //   resetAfterEquals(); // Prepare for a new calculation
+      // } else {
+      //   display("Error: Invalid input");
+      // }
     }
   }
 
