@@ -25,7 +25,7 @@ class _CalculatorscreenState extends State<Calculatorscreen> {
     });
   }
 
-void delete() {
+  void delete() {
     if (displayValue.isNotEmpty) {
       setState(() {
         // Remove the last character
@@ -62,7 +62,7 @@ void delete() {
     return true;
   }
 
-void parseAndCompute(String expression) {
+  void parseAndCompute(String expression) {
     // Reset all values
     num1 = 0.0;
     num2 = 0.0;
@@ -355,17 +355,17 @@ void parseAndCompute(String expression) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color.fromARGB(232, 0, 0, 0),
-        appBar: AppBar(
-          title: const Text("Calculator"),
-          centerTitle: true,
-        ),
-        body: Column(children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-                margin: const EdgeInsets.only(bottom: 0),
-                height: 300,
+      backgroundColor: const Color.fromARGB(232, 0, 0, 0),
+      appBar: AppBar(
+        title: const Text("Calculator"),
+        centerTitle: true,
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              Container(
+                height: 300, // Fixed height for the top section
                 width: double.infinity,
                 color: const Color.fromARGB(210, 22, 22, 22),
                 alignment: AlignmentDirectional.bottomEnd,
@@ -388,29 +388,24 @@ void parseAndCompute(String expression) {
                       ),
                     ),
                   ],
-                )
-                //color: Colors.green
                 ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Container(
-              // height: 400,
-              margin: const EdgeInsets.only(bottom: 0),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(204, 68, 67, 67),
-                // borderRadius: BorderRadius.only(
-                //   topLeft: Radius.circular(50),
-                //   topRight: Radius.circular(50),
-                // ),
               ),
-              child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              Container(
+                height: constraints.maxHeight -
+                    300, // Remaining height for the grid
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(204, 68, 67, 67),
+                ),
+                child: GridView.builder(
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Disable scrolling
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4, // Number of squares per row
                     crossAxisSpacing: 2, // Spacing between columns
                     mainAxisSpacing: 2, // Spacing between rows
+                    mainAxisExtent: (constraints.maxHeight -300)/5, 
                   ),
-                  itemCount: 20, // Total number of squares (3x3)
+                  itemCount: 20, // Total number of squares
                   itemBuilder: (context, index) {
                     final box = boxData[index];
                     return Container(
@@ -433,9 +428,13 @@ void parseAndCompute(String expression) {
                         ),
                       ),
                     );
-                  }),
-            ),
-          ),
-        ]));
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
